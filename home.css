@@ -1,0 +1,219 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.8;
+  color: #444;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 导航栏美化 */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  padding: 80px 100px;
+  border-bottom: 1px solid #dde2e8;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: relative;
+  top: 0;
+  width: 100%;
+  height: 80px;
+}
+
+.profile {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.name {
+  font-family: 'kaiti', serif;
+  font-weight: bold;
+  font-size: 35px;
+  margin: 2px 0;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+
+.name span {
+  font-size: 24px;
+  font-weight: bold;
+  color: #555;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.tagline {
+  font-style: italic;
+  color: #0066cc;
+  margin: 0px 0 12px 0;
+  font-size: 18px;
+}
+
+/* 导航链接容器 */
+.nav-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;        /* 2 列，等宽 */
+  grid-template-rows: 1fr 1fr;         /* 2 行，高度自适应 */
+  gap: 6px 24px; /* 第一个值：row-gap（行距），第二个值：column-gap（列距） */
+  margin: 20px 0;
+}
+
+.nav-links li {
+  margin-bottom: 14px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: #e8f0fe;
+  color: #0066cc;
+  transform: translateX(4px);
+}
+
+.nav-links i {
+  width: 20px;
+  color: #0066cc;
+  font-size: 14px;
+}
+
+.footer-links {
+  font-size: 16px;
+  color: #888;
+  line-height: 1.6;
+}
+
+.footer-links a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #0066cc;
+}
+
+/* 主体内容区域 */
+.content {
+  flex: 1;
+  padding: 20px 40px 60px;  /* 上内边距留出导航空间 */
+  max-width: 900px;
+  margin: 0 auto; /* 居中显示 */
+  width: 100%;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #eee;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2 i {
+  color: #0066cc;
+  background: #e8f0fe;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+.section h3 {
+  font-size: 18px;
+  margin: 25px 0 12px;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section h3 i {
+  color: #0066cc;
+  font-size: 14px;
+  background: #f0f7ff;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+
+/* 链接美化 */
+.content a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.content a:hover {
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 15px;
+    height: auto;
+    gap: 10px;
+  }
+  .content {
+    margin-left: 0;
+    padding: 30px 20px;
+  }
+  .name {
+    font-size: 26px;
+  }
+  .name span {
+    font-size: 20px;
+  }
+  .card {
+    padding: 20px;
+  }
+}
