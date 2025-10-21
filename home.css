@@ -1,96 +1,219 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>陈登焱的主页</title>
-  <link rel="stylesheet" href="home.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-</head>
-<body>
-  <div class="container">
-    <!-- 导航 -->
-    <nav class="navbar">
-      <div class="profile">
-        <h1 class="name">陈登焱 <span>CHEN DENGYAN</span></h1>
-        <p class="tagline">"追求卓越 猛进如潮"  </p>
+body {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.8;
+  color: #444;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  min-height: 100vh;
+}
 
-        <div class="footer-links">
-        · <a href="https://chendengyan.github.io/index.html" target="_blank"><span title="点击进入我的主页">我的主页</span></a> ·
-        
-        </div>
-      </div>
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-      <ul class="nav-links">
-        <li><a href="#research"><i class="fas fa-flask"></i> 我的研究兴趣</a></li>
-        <li><a href="#future"><i class="fas fa-rocket"></i> 我的未来规划</a></li>
-        <li><a href="#cv"><i class="fas fa-file-alt"></i> 我的个人简历</a></li>
-        <li><a href="#contact"><i class="fas fa-envelope"></i> 与我联系</a></li>
-      </ul>
+/* 导航栏美化 */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  padding: 80px 100px;
+  border-bottom: 1px solid #dde2e8;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: relative;
+  top: 0;
+  width: 100%;
+  height: 80px;
+}
 
-      <div>
-        <a href="https://www.nbu.edu.cn/"><span title="点击进入宁波大学官网"><img src="https://www.urongda.com/images/normal/medium/ningbo-university-logo-1024px.png" alt="学校" style="width: 100px;height: 100px;"></span></a>
-      </div>
-     
-    </nav>
+.profile {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
-    <!-- 下方内容 -->
-    <main class="content">
-      <section id="research" class="section">
-        <div class="card">
-          <h2><i class="fas fa-lightbulb"></i> 我的研究兴趣</h2>
-          <p style="margin-bottom: 20px;margin-left: 20px;">关注人机交互领域，目前正在推进一项人机交互研究，旨在探讨在股票投资情境中，人工智能作为社会规范的制定者对人类从众行为的影响。</p>
-          <p style="margin-left: 20px;">以下是实验的1.0版本，还需进行进一步完善。</p>
-          <p style="margin: 0 240px;border: 2px solid #dfdede;background-color: azure;">点击进入我的实验：<a href="https://chendengyan.github.io/实验一.html" target="_blank">实验一</a>
-            <a href="https://chendengyan.github.io/实验二.html" target="_blank">实验二</a></p>
-          
-        </div>
-      </section>
+.name {
+  font-family: 'kaiti', serif;
+  font-weight: bold;
+  font-size: 35px;
+  margin: 2px 0;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
 
-      <section id="future" class="section">
-        <div class="card">
-          <h2><i class="fas fa-binoculars"></i> 我的未来规划</h2>
-          <ul>
-            <li style="margin-left: 20px;">我希望深入探索人机交互与心理学、人工智能的交叉领域，致力于设计更智能、自适应且符合人类认知习惯的交互系统。</li>
-            <li style="margin-left: 20px;">具体方向包括：基于用户意图识别的上下文感知交互、多模态融合（语音、手势、眼动）的自然交互技术，以及面向复杂决策场景（如金融、医疗）的可解释性AI界面设计。</li>
-            <li style="margin-left: 20px;">我的目标是通过实证研究与系统构建相结合的方式，推动人机协同效率的提升，创造更具包容性与可信度的用户体验。</li>
-          </ul>
-          
-        </div>
-      </section>
+.name span {
+  font-size: 24px;
+  font-weight: bold;
+  color: #555;
+  font-family: 'Times New Roman', Times, serif;
+}
 
-      <section id="cv" class="section">
-        <div class="card">
-          <h2><i class="fas fa-graduation-cap"></i> 我的个人简历</h2>
-          <div style="font-size: 15px;">
-            <h3><i class="fas fa-project-diagram"></i> 科研项目</h3>
-            <ol style="margin-left: 28px;margin-top: 8px;">
-                <li style="margin-bottom: 14px;padding-left: 4px;">国家级大学生创新创业训练项目，囹圄之光——恢复性司法框架下在押未成年人三维矫正体系构建者，已完成结项条件</li>
-                <li style="margin-bottom: 14px;padding-left: 4px;">宁波大学大学生科技创新计划项目，如果AI的“脑回路”清晰可见，我们还会犹豫它的建议吗？——AI的可解释性如何影响人类的决策</li>
-            </ol>
-            <h3><i class="fas fa-tree"></i> 兴趣爱好</h3>
-            <ul>
-              <li style="padding-left: 4px;margin-left: 20px;">喜欢徒步和定向越野，这段时间爱上了开车去探索未知的地方</li>
-              <li style="padding-left: 4px;margin-left: 20px;">铁路迷，超级爱研究轨道交通</li>
-              <li style="padding-left: 4px;margin-left: 20px;">最近在研究基金市场，深感水太深，把握不住</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+.tagline {
+  font-style: italic;
+  color: #0066cc;
+  margin: 0px 0 12px 0;
+  font-size: 18px;
+}
 
-      <section id="contact" class="section">
-        <div class="card">
-          <h2><i class="fas fa-comments"></i> 与我联系</h2>
-          <p style="margin-left: 20px;"><i class="fas fa-envelope"></i> <a href="mailto:1602415423@qq.com">1602415423@qq.com</a><br>如果你觉得我的研究有意思，或者也有类似的想法，欢迎随时找我聊聊！一杯咖啡的时间，或许就能激发出下一个好点子!</p>
+/* 导航链接容器 */
+.nav-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;        /* 2 列，等宽 */
+  grid-template-rows: 1fr 1fr;         /* 2 行，高度自适应 */
+  gap: 6px 24px; /* 第一个值：row-gap（行距），第二个值：column-gap（列距） */
+  margin: 20px 0;
+}
 
-          <h3><i class="fas fa-user"></i> 一些想说的话</h3>
-          <p style="margin-left: 20px;">很感谢您能看到这里 ❤️<br>
-            这是我做的第一个博客，每一份访问都让我备受鼓舞。<br>
-            如果你愿意，欢迎留下反馈或一起交流，我会继续努力，记录成长，分享所思。</p>
-        </div>
-      </section>
-    </main>
-  </div>
-</body>
-</html>
+.nav-links li {
+  margin-bottom: 14px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: #e8f0fe;
+  color: #0066cc;
+  transform: translateX(4px);
+}
+
+.nav-links i {
+  width: 20px;
+  color: #0066cc;
+  font-size: 14px;
+}
+
+.footer-links {
+  font-size: 16px;
+  color: #888;
+  line-height: 1.6;
+}
+
+.footer-links a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #0066cc;
+}
+
+/* 主体内容区域 */
+.content {
+  flex: 1;
+  padding: 20px 40px 60px;  /* 上内边距留出导航空间 */
+  max-width: 900px;
+  margin: 0 auto; /* 居中显示 */
+  width: 100%;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #eee;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section h2 i {
+  color: #0066cc;
+  background: #e8f0fe;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+.section h3 {
+  font-size: 18px;
+  margin: 25px 0 12px;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section h3 i {
+  color: #0066cc;
+  font-size: 14px;
+  background: #f0f7ff;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+
+/* 链接美化 */
+.content a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.content a:hover {
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 15px;
+    height: auto;
+    gap: 10px;
+  }
+  .content {
+    margin-left: 0;
+    padding: 30px 20px;
+  }
+  .name {
+    font-size: 26px;
+  }
+  .name span {
+    font-size: 20px;
+  }
+  .card {
+    padding: 20px;
+  }
+}
