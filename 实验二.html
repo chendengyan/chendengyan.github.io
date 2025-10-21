@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票投资决策实验</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin:  auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            padding: 25px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            padding: 30px;
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1.5fr 1fr;
+            }
+        }
+        
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            color: #1a2980;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eef2f7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: #26d0ce;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stock-info {
+            background: #e8f4fc;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stock-info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stock-info-item .label {
+            color: #5a6b7c;
+        }
+        
+        .stock-info-item .value {
+            font-weight: 700;
+            color: #1a2980;
+        }
+        
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+        
+        #stockChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .time-filters {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .time-btn {
+            padding: 8px 15px;
+            background: #f0f7ff;
+            border: 1px solid #d1e3f8;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .time-btn:hover, .time-btn.active {
+            background: #1a2980;
+            color: white;
+            border-color: #1a2980;
+        }
+        
+        .decision-section {
+            display: grid;
+            gap: 25px;
+        }
+        
+        .investment-panel, .ai-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(26, 41, 128, 0.4);
+        }
+        
+        .btn:disabled {
+            background: linear-gradient(to right, #cccccc, #e0e0e0);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .ai-panel {
+            position: relative;
+        }
+        
+        .ai-agents {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .ai-agent {
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f9fbfd;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .ai-agent.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .ai-agent:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: #c5d9e8;
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .agent-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        
+        .agent-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1a2980;
+        }
+        
+        .thinking {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #5a6b7c;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        .advice-content {
+            margin-left: 61px;
+        }
+        
+        .recommendation {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .confidence {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e1f0fa;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1a2980;
+        }
+        
+        .alternative-options {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 3px solid #3498db;
+            font-size: 0.95rem;
+        }
+        
+        .alternative-options div {
+            margin-bottom: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+            line-height: 1.5;
+        }
+        
+        .alternative-options small {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 4px;
+        }
+        
+        .reasoning {
+            margin-top: 15px;
+            font-style: normal;
+            color: #5a6b7c;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #26d0ce;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .result-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+        }
+        
+        .result-modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            color: #1a2980;
+            margin-bottom: 10px;
+        }
+        
+        .result-details {
+            margin: 20px 0;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #5a6b7c;
+        }
+        
+        .result-value {
+            font-weight: 700;
+            color: #1a2980;
+        }
+        
+        .conformity-score {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 25px 0;
+            color: #26d0ce;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close-btn {
+            background: #1a2980;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: #0e1a5a;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .round-info {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #1a2980;
+            display: none; /* 隐藏轮次信息 */
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #eef2f7;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .condition-info {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #1a2980;
+            border: 1px solid #d1e3f8;
+        }
+        
+        .export-section {
+            margin: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .export-btn i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> 股票投资决策实验</h1>
+            <p class="subtitle">观察股票走势，做出投资决策，查看AI建议，调整您的策略</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="chart-section">
+                <div class="panel-title">
+                    <i class="fas fa-chart-bar"></i> 股票走势分析
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="round-info">
+                    当前条件: <span id="currentCondition">1个AI - 替代建议 - 3/3同向</span> | 
+                    轮次: <span id="currentRound">1</span>/<span id="roundsPerCondition">5</span> | 
+                    总进度: <span id="totalProgress">1</span>/<span id="totalRounds">50</span>
+                </div>
+                
+                <div class="condition-info">
+                    初始持仓: <strong>100股</strong> | 买卖限制: <strong>±100股</strong>
+                </div>
+                
+                <div class="chart-header">
+                    <div class="stock-info">
+                        <div class="stock-info-item">
+                            <span class="label">股票代码:</span>
+                            <span class="value" id="stockSymbol">AAPL</span>
+                        </div>
+                        <div class="stock-info-item">
+                            <span class="label">当前价格:</span>
+                            <span class="value" id="currentPrice">$175.42</span>
+                        </div>
+                        <div class="stock-info-item">
+                            <span class="label">今日涨跌:</span>
+                            <span class="value" id="priceChange" style="color:#26d0ce">+1.2%</span>
+                        </div>
+                        <div class="stock-info-item">
+                            <span class="label">交易量:</span>
+                            <span class="value" id="volume">4.2M</span>
+                        </div>
+                    </div>
+                    
+                    <div class="time-filters">
+                        <div class="time-btn active">1D</div>
+                        <div class="time-btn">1W</div>
+                        <div class="time-btn">1M</div>
+                        <div class="time-btn">3M</div>
+                        <div class="time-btn">1Y</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="decision-section">
+                <div class="investment-panel">
+                    <div class="panel-title">
+                        <i class="fas fa-hand-holding-usd"></i> 您的投资决策
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="initialInvestment">初始持仓: <strong>100股</strong></label>
+                    </div>
+                    
+                    <div class="input-group" id="firstDecisionGroup">
+                        <label class="input-label" for="firstInvestment">初次调整数量 (±100股以内)</label>
+                        <input type="number" id="firstInvestment" class="input-field" min="-100" max="100" value="0" placeholder="输入买入(正数)或卖出(负数)数量">
+                    </div>
+                    
+                    <div class="input-group" id="firstHoldingGroup">
+                        <label class="input-label">初次最终持仓:</label>
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #1a2980;">
+                            <span id="firstHolding">100</span> 股
+                        </div>
+                    </div>
+                    
+                    <button id="submitFirstDecision" class="btn">
+                        <i class="fas fa-check-circle"></i> 提交初次决策
+                    </button>
+                    
+                    <div class="ai-advice-container" id="aiAdviceContainer" style="margin-top: 30px; display: none;">
+                        <div class="panel-title">
+                            <i class="fas fa-robot"></i> AI投资建议
+                        </div>
+                        <p id="adviceStatus">请查看AI建议后做出最终决策</p>
+                        <div class="ai-agents" id="aiAgents"></div>
+                    </div>
+                    
+                    <div class="second-decision" id="secondDecision" style="margin-top: 20px; display: none;">
+                        <div class="input-group">
+                            <label class="input-label" for="secondInvestment">第二次调整数量 (基于AI建议)</label>
+                            <input type="number" id="secondInvestment" class="input-field" min="-100" max="100" value="0" placeholder="输入买入(正数)或卖出(负数)数量">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">最终持仓:</label>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: #1a2980;">
+                                <span id="finalHolding">100</span> 股
+                            </div>
+                        </div>
+                        
+                        <button id="submitSecondDecision" class="btn">
+                            <i class="fas fa-check-circle"></i> 提交最终决策
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="export-section" id="exportSection" style="display: none;">
+            <div class="panel-title">
+                <i class="fas fa-download"></i> 数据导出
+            </div>
+            <p>实验已完成！您可以导出实验数据以供分析。</p>
+            <button id="exportData" class="export-btn">
+                <i class="fas fa-file-export"></i> 导出数据为CSV
+            </button>
+        </div>
+        
+        <footer>
+            <p>股票投资决策实验 &copy; 2023 | 行为金融学研究</p>
+        </footer>
+    </div>
+    
+    <div class="result-modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">决策结果</h2>
+                <p>您的投资决策已完成</p>
+            </div>
+            
+            <div class="result-details">
+                <div class="result-item">
+                    <span class="result-label">初始持仓:</span>
+                    <span class="result-value">100 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">初次调整:</span>
+                    <span class="result-value" id="resFirstAdjustment">0 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">最终调整:</span>
+                    <span class="result-value" id="resSecondAdjustment">0 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">最终持仓:</span>
+                    <span class="result-value" id="resFinalHolding">100 股</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">AI共识方向:</span>
+                    <span class="result-value" id="resConsensus">买入</span>
+                </div>
+            </div>
+            
+            <div class="conformity-score" id="conformityScore">0</div>
+            <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px;">
+                正值表示您遵循了AI建议，负值表示您背离了AI建议
+            </p>
+            
+            <button class="close-btn" id="closeModal">
+                <i class="fas fa-arrow-right"></i> 继续下一轮
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 实验配置参数
+        const experimentConfig = {
+            // 实验设计参数 - 10个处理，每个处理5个试次
+            conditions: [
+                // 3个AI - 替代建议 - 不同规范强度
+                { aiCount: 3, explanationType: "alternatives", normativeStrength: "3/3", id: 0 },
+                { aiCount: 3, explanationType: "alternatives", normativeStrength: "2/3", id: 1 },
+                
+                // 3个AI - 预测理由 - 不同规范强度
+                { aiCount: 3, explanationType: "reasoning", normativeStrength: "3/3", id: 2 },
+                { aiCount: 3, explanationType: "reasoning", normativeStrength: "2/3", id: 3 },
+                
+                // 5个AI - 替代建议 - 不同规范强度
+                { aiCount: 5, explanationType: "alternatives", normativeStrength: "5/5", id: 4 },
+                { aiCount: 5, explanationType: "alternatives", normativeStrength: "4/5", id: 5 },
+                { aiCount: 5, explanationType: "alternatives", normativeStrength: "3/5", id: 6 },
+                
+                // 5个AI - 预测理由 - 不同规范强度
+                { aiCount: 5, explanationType: "reasoning", normativeStrength: "5/5", id: 7 },
+                { aiCount: 5, explanationType: "reasoning", normativeStrength: "4/5", id: 8 },
+                { aiCount: 5, explanationType: "reasoning", normativeStrength: "3/5", id: 9 }
+            ],
+            roundsPerCondition: 5,
+            currentConditionIndex: 0,
+            currentRoundInCondition: 1,
+            
+            // 投资参数
+            initialHolding: 100,
+            maxAdjustment: 100,
+            
+            // 数据收集
+            trialData: [] // 存储所有试次数据
+        };
+        
+        // 实验状态
+        const experimentState = {
+            currentStock: "",
+            currentTrendType: "",
+            conditionOrder: [],
+            firstAdjustment: 0,
+            secondAdjustment: 0,
+            finalHolding: 100,
+            usedTrendTypes: [],
+            currentAIConsensus: 0, // AI共识平均值
+            currentAICounterConsensus: null, // AI反共识平均值
+            aiRecommendations: [], // 各个AI的具体建议
+            consensusDirection: "buy" // 共识方向
+        };
+        
+        // 图表实例
+        let stockChart;
+        
+        // 初始化实验
+        document.addEventListener('DOMContentLoaded', function() {
+            // 随机化条件顺序
+            experimentState.conditionOrder = [...experimentConfig.conditions].sort(() => Math.random() - 0.5);
+            
+            // 设置总轮次显示
+            document.getElementById('totalRounds').textContent = experimentConfig.conditions.length * experimentConfig.roundsPerCondition;
+            document.getElementById('roundsPerCondition').textContent = experimentConfig.roundsPerCondition;
+            
+            // 更新进度条
+            updateProgress();
+            
+            // 设置输入事件
+            document.getElementById('firstInvestment').addEventListener('input', updateFirstHolding);
+            document.getElementById('secondInvestment').addEventListener('input', updateFinalHolding);
+            
+            document.getElementById('submitFirstDecision').addEventListener('click', handleFirstDecisionSubmission);
+            document.getElementById('submitSecondDecision').addEventListener('click', handleSecondDecisionSubmission);
+            document.getElementById('closeModal').addEventListener('click', closeResultModal);
+            document.getElementById('exportData').addEventListener('click', exportDataToCSV);
+            
+            // 开始第一轮
+            startNewRound();
+        });
+        
+        // 开始新一轮
+        function startNewRound() {
+            // 获取当前条件
+            const currentCondition = experimentState.conditionOrder[experimentConfig.currentConditionIndex];
+            
+            // 选择未使用的趋势类型
+            let availableTrends = ["strongUp", "moderateUp", "stable", "moderateDown", "strongDown"]
+                .filter(trend => !experimentState.usedTrendTypes.includes(trend));
+            
+            // 如果所有类型都已使用，重置列表
+            if (availableTrends.length === 0) {
+                experimentState.usedTrendTypes = [];
+                availableTrends = ["strongUp", "moderateUp", "stable", "moderateDown", "strongDown"];
+            }
+            
+            // 随机选择趋势类型
+            const randomIndex = Math.floor(Math.random() * availableTrends.length);
+            const selectedTrend = availableTrends[randomIndex];
+            experimentState.currentTrendType = selectedTrend;
+            experimentState.usedTrendTypes.push(selectedTrend);
+            
+            // 生成股票数据（基于趋势类型和条件ID）
+            const stockData = generateStockData(selectedTrend, currentCondition.id);
+            
+            // 设置股票信息
+            experimentState.currentStock = stockData.symbol;
+            document.getElementById('stockSymbol').textContent = stockData.symbol;
+            document.getElementById('currentPrice').textContent = `$${stockData.currentPrice.toFixed(2)}`;
+            
+            // 计算涨跌幅
+            const changeElement = document.getElementById('priceChange');
+            changeElement.textContent = `${stockData.changePercent >= 0 ? '+' : ''}${stockData.changePercent}%`;
+            changeElement.style.color = stockData.changePercent >= 0 ? '#26d0ce' : '#e74c3c';
+            
+            // 设置交易量
+            document.getElementById('volume').textContent = `${(stockData.volume / 1000000).toFixed(1)}M`;
+            
+            // 设置共识方向
+            experimentState.consensusDirection = stockData.consensusDirection;
+            
+            // 渲染股票图表
+            renderStockChart(stockData.data);
+            
+            // 重置投资决策
+            resetDecisionForms();
+            
+            // 确保初始决策区域可见
+            document.getElementById('firstDecisionGroup').style.display = 'block';
+            document.getElementById('firstHoldingGroup').style.display = 'block';
+            document.getElementById('submitFirstDecision').style.display = 'block';
+            
+            // 隐藏AI建议和第二次决策界面
+            document.getElementById('aiAdviceContainer').style.display = 'none';
+            document.getElementById('secondDecision').style.display = 'none';
+            
+            // 清空AI建议容器
+            document.getElementById('aiAgents').innerHTML = '';
+            
+            // 重置AI建议状态
+            experimentState.aiRecommendations = [];
+            experimentState.currentAIConsensus = 0;
+            experimentState.currentAICounterConsensus = null;
+        }
+        
+        // 生成股票数据（基于趋势类型和条件ID）
+        function generateStockData(trendType, conditionId) {
+            const data = [];
+            let price;
+            
+            // 根据趋势类型设置初始价格
+            switch(trendType) {
+                case "strongUp":
+                    price = 150 + conditionId * 0.5;
+                    break;
+                case "moderateUp":
+                    price = 160 + conditionId * 0.3;
+                    break;
+                case "stable":
+                    price = 170 + conditionId * 0.2;
+                    break;
+                case "moderateDown":
+                    price = 180 - conditionId * 0.3;
+                    break;
+                case "strongDown":
+                    price = 190 - conditionId * 0.5;
+                    break;
+                default:
+                    price = 170;
+            }
+            
+            const volumes = [];
+            
+            for (let i = 0; i < 30; i++) {
+                // 基于趋势类型和条件ID生成确定性波动
+                let change;
+                switch(trendType) {
+                    case "strongUp":
+                        change = (Math.sin(i/3) + 0.8 + Math.cos(conditionId + i/2)*0.3) * 0.8;
+                        break;
+                    case "moderateUp":
+                        change = (Math.sin(i/4) + 0.5 + Math.sin(conditionId + i/3)*0.4) * 0.6;
+                        break;
+                    case "stable":
+                        change = (Math.sin(i/5) + Math.cos(conditionId + i/4)*0.7) * 0.4;
+                        break;
+                    case "moderateDown":
+                        change = (Math.sin(i/4) - 0.5 + Math.sin(conditionId + i/3)*0.4) * 0.6;
+                        break;
+                    case "strongDown":
+                        change = (Math.sin(i/3) - 0.8 + Math.cos(conditionId + i/2)*0.3) * 0.8;
+                        break;
+                    default:
+                        change = (Math.random() - 0.5) * 1.5;
+                }
+                
+                // 添加基于条件ID的微小随机扰动
+                const minorVariation = (Math.sin(conditionId * 10 + i) * 0.1);
+                price += change + minorVariation;
+                
+                // 交易量
+                const volume = Math.floor(2000000 + Math.abs(change)*1000000 + Math.random()*3000000);
+                volumes.push(volume);
+                
+                data.push({
+                    day: i + 1,
+                    price: parseFloat(price.toFixed(2)),
+                    volume: volume
+                });
+            }
+            
+            // 计算涨跌幅
+            const prevDayPrice = data[28].price;
+            const changePercent = ((data[29].price - prevDayPrice) / prevDayPrice * 100).toFixed(2);
+            
+            // 分配股票代码（基于趋势类型和条件ID）
+            const symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "AMD"];
+            const symbolIndex = (trendType.charCodeAt(0) + conditionId) % symbols.length;
+            const symbol = symbols[symbolIndex];
+            
+            // 设置共识方向（基于趋势类型）
+            let consensusDirection;
+            if (trendType.includes("Up")) {
+                consensusDirection = "buy";
+            } else if (trendType.includes("Down")) {
+                consensusDirection = "sell";
+            } else {
+                // 对于稳定趋势，随机分配方向
+                consensusDirection = Math.random() > 0.5 ? "buy" : "sell";
+            }
+            
+            return {
+                symbol: symbol,
+                trendType: trendType,
+                data: data,
+                currentPrice: data[29].price,
+                changePercent: parseFloat(changePercent),
+                volume: volumes[29],
+                consensusDirection: consensusDirection
+            };
+        }
+        
+        // 更新进度显示
+        function updateProgress() {
+            const totalRounds = experimentConfig.conditions.length * experimentConfig.roundsPerCondition;
+            const completedRounds = 
+                (experimentConfig.currentConditionIndex * experimentConfig.roundsPerCondition) + 
+                (experimentConfig.currentRoundInCondition - 1);
+            const progress = (completedRounds / totalRounds) * 100;
+            
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        
+        // 渲染股票图表
+        function renderStockChart(data) {
+            const ctx = document.getElementById('stockChart');
+            if (!ctx) return;
+            
+            // 销毁之前的图表实例
+            if (stockChart) {
+                stockChart.destroy();
+            }
+            
+            // 创建渐变背景
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(26, 41, 128, 0.2)');
+            gradient.addColorStop(1, 'rgba(38, 208, 206, 0.05)');
+            
+            // 生成日期标签
+            const today = new Date();
+            const labels = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('zh-CN', { 
+                    month: 'short', 
+                    day: 'numeric'
+                }));
+            }
+            
+            stockChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '股价 ($)',
+                        data: data.map(d => d.price),
+                        borderColor: '#1a2980',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(26, 41, 128, 0.9)',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `股价: $${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 6
+                            }
+                        },
+                        y: {
+                            position: 'right',
+                            grid: {
+                                color: 'rgba(200, 200, 200, 0.2)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        // 更新初次持仓显示
+        function updateFirstHolding() {
+            const adjustment = parseInt(document.getElementById('firstInvestment').value) || 0;
+            const holding = experimentConfig.initialHolding + adjustment;
+            document.getElementById('firstHolding').textContent = holding;
+        }
+        
+        // 更新最终持仓显示
+        function updateFinalHolding() {
+            const adjustment = parseInt(document.getElementById('secondInvestment').value) || 0;
+            const holding = experimentConfig.initialHolding + experimentState.firstAdjustment + adjustment;
+            document.getElementById('finalHolding').textContent = holding;
+        }
+        
+        // 处理初次决策提交
+        function handleFirstDecisionSubmission() {
+            const adjustment = parseInt(document.getElementById('firstInvestment').value) || 0;
+            
+            // 验证调整范围
+            if (Math.abs(adjustment) > experimentConfig.maxAdjustment) {
+                alert(`调整数量不能超过±${experimentConfig.maxAdjustment}股`);
+                return;
+            }
+            
+            // 记录初次调整
+            experimentState.firstAdjustment = adjustment;
+            
+            // 隐藏初次决策区域
+            document.getElementById('firstDecisionGroup').style.display = 'none';
+            document.getElementById('firstHoldingGroup').style.display = 'none';
+            document.getElementById('submitFirstDecision').style.display = 'none';
+            
+            // 显示AI建议
+            document.getElementById('aiAdviceContainer').style.display = 'block';
+            
+            // 生成AI建议
+            generateAIAdvice();
+            
+            // 显示第二次决策区域
+            document.getElementById('secondDecision').style.display = 'block';
+        }
+        
+        // 生成AI建议
+        function generateAIAdvice() {
+            const aiAgentsContainer = document.getElementById('aiAgents');
+            aiAgentsContainer.innerHTML = '';
+            
+            const currentCondition = experimentState.conditionOrder[experimentConfig.currentConditionIndex];
+            const aiCount = currentCondition.aiCount;
+            const explanationType = currentCondition.explanationType;
+            const normativeStrength = currentCondition.normativeStrength;
+            
+            // 解析规范强度（例如"3/5"）
+            const [consensusCount, totalCount] = normativeStrength.split('/').map(Number);
+            
+            // 生成共识方向建议
+            const consensusDirection = experimentState.consensusDirection;
+            const consensusRecommendations = [];
+            
+            for (let i = 0; i < consensusCount; i++) {
+                // 生成共识方向建议值
+                let recommendationValue;
+                if (consensusDirection === "buy") {
+                    recommendationValue = Math.floor(Math.random() * 50) + 51; // 51-100
+                } else {
+                    recommendationValue = Math.floor(Math.random() * 50) - 100; // -100 to -51
+                }
+                
+                consensusRecommendations.push(recommendationValue);
+            }
+            
+            // 生成反共识方向建议（如果有）
+            const counterConsensusRecommendations = [];
+            if (consensusCount < totalCount) {
+                for (let i = 0; i < totalCount - consensusCount; i++) {
+                    // 生成反共识方向建议值
+                    let recommendationValue;
+                    if (consensusDirection === "buy") {
+                        recommendationValue = Math.floor(Math.random() * 50) - 100; // -100 to -51
+                    } else {
+                        recommendationValue = Math.floor(Math.random() * 50) + 51; // 51-100
+                    }
+                    
+                    counterConsensusRecommendations.push(recommendationValue);
+                }
+            }
+            
+            // 合并所有建议
+            const allRecommendations = [...consensusRecommendations, ...counterConsensusRecommendations];
+            
+            // 打乱顺序（如果需要）
+            for (let i = allRecommendations.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allRecommendations[i], allRecommendations[j]] = [allRecommendations[j], allRecommendations[i]];
+            }
+            
+            // 计算共识平均值和反共识平均值
+            experimentState.currentAIConsensus = consensusRecommendations.length > 0 ? 
+                consensusRecommendations.reduce((a, b) => a + b, 0) / consensusRecommendations.length : 0;
+                
+            experimentState.currentAICounterConsensus = counterConsensusRecommendations.length > 0 ? 
+                counterConsensusRecommendations.reduce((a, b) => a + b, 0) / counterConsensusRecommendations.length : null;
+            
+            // 存储所有AI建议
+            experimentState.aiRecommendations = allRecommendations;
+            
+            // 生成AI代理
+            for (let i = 0; i < aiCount; i++) {
+                const recommendation = allRecommendations[i];
+                const isConsensus = i < consensusCount;
+                
+                const aiAgent = document.createElement('div');
+                aiAgent.className = 'ai-agent';
+                
+                // 生成AI建议内容
+                let adviceContent = '';
+                if (explanationType === "alternatives") {
+                    // 完善的替代建议内容
+                    adviceContent = generateAlternativeAdviceContent(recommendation, isConsensus);
+                } else if (explanationType === "reasoning") {
+                    adviceContent = generateReasoningAdviceContent(recommendation, isConsensus);
+                }
+                
+                aiAgent.innerHTML = `
+                    <div class="agent-header">
+                        <div class="agent-icon">AI</div>
+                        <div class="agent-name">投资顾问 ${i+1}</div>
+                        <div class="thinking">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                    <div class="advice-content">
+                        ${adviceContent}
+                    </div>
+                `;
+                
+                aiAgentsContainer.appendChild(aiAgent);
+                
+                // 延迟显示AI代理，创建动画效果
+                setTimeout(() => {
+                    aiAgent.classList.add('visible');
+                }, 300 * i);
+            }
+        }
+        
+        // 生成替代建议内容
+        function generateAlternativeAdviceContent(recommendation, isConsensus) {
+            const action = recommendation > 0 ? '买入' : '卖出';
+            const absAmount = Math.abs(recommendation);
+            
+            // 生成不同的替代策略
+            const strategies = [
+                {
+                    name: "趋势跟踪策略",
+                    amount: absAmount + 10,
+                    reasoning: "基于近期价格动量，建议增加仓位以捕捉趋势"
+                },
+                {
+                    name: "均值回归策略", 
+                    amount: absAmount - 15,
+                    reasoning: "考虑到价格可能回调，建议减少仓位以控制风险"
+                },
+                {
+                    name: "风险平衡策略",
+                    amount: absAmount,
+                    reasoning: "基于风险收益比优化，建议保持当前建议仓位"
+                },
+                {
+                    name: "波动率调整策略",
+                    amount: absAmount + 5,
+                    reasoning: "根据市场波动率调整，略微增加仓位以获取更好风险调整后收益"
+                }
+            ];
+            
+            // 随机选择3个策略
+            const selectedStrategies = [];
+            const usedIndices = new Set();
+            
+            while (selectedStrategies.length < 3 && selectedStrategies.length < strategies.length) {
+                const randomIndex = Math.floor(Math.random() * strategies.length);
+                if (!usedIndices.has(randomIndex)) {
+                    usedIndices.add(randomIndex);
+                    selectedStrategies.push(strategies[randomIndex]);
+                }
+            }
+            
+            // 构建替代建议HTML
+            let alternativesHTML = '';
+            selectedStrategies.forEach(strategy => {
+                alternativesHTML += `
+                    <div>
+                        <strong>${strategy.name}:</strong> ${action} ${strategy.amount} 股
+                        <br><small>${strategy.reasoning}</small>
+                    </div>
+                `;
+            });
+            
+            // 添加持有选项
+            alternativesHTML += `
+                <div>
+                    <strong>持有策略:</strong> 保持当前仓位不变
+                    <br><small>观望市场变化，等待更明确信号</small>
+                </div>
+            `;
+            
+            return `
+                <div class="recommendation">
+                    <strong>主要建议:</strong> ${action} ${absAmount} 股
+                </div>
+                <span class="confidence">置信度: ${Math.floor(Math.random() * 30) + 70}%</span>
+                <div class="alternative-options">
+                    <p><strong>替代投资策略:</strong></p>
+                    ${alternativesHTML}
+                </div>
+            `;
+        }
+        
+        // 生成预测理由内容
+        function generateReasoningAdviceContent(recommendation, isConsensus) {
+            const action = recommendation > 0 ? '买入' : '卖出';
+            const absAmount = Math.abs(recommendation);
+            
+            // 生成技术分析理由
+            const technicalReasons = [
+                "MACD指标显示金叉信号，短期动量转强",
+                "RSI指标脱离超买/超卖区域，显示价格回归均衡趋势",
+                "布林带收窄后扩张，预示即将出现方向性突破",
+                "价格突破关键阻力/支撑位，技术形态支持当前方向",
+                "成交量放大配合价格变动，确认趋势有效性"
+            ];
+            
+            // 生成基本面理由
+            const fundamentalReasons = [
+                "公司最新财报显示营收增长超预期，基本面改善",
+                "行业政策利好，长期增长前景乐观",
+                "估值水平处于历史低位，投资价值凸显",
+                "分析师普遍上调目标价，市场预期积极",
+                "股息收益率吸引人，提供下行保护"
+            ];
+            
+            // 生成市场情绪理由
+            const sentimentReasons = [
+                "机构投资者持仓增加，聪明资金流向积极",
+                "期权市场看涨/看跌比例显示市场情绪转向",
+                "社交媒体讨论热度上升，关注度提高",
+                "新闻情绪分析显示正面报道占比提升",
+                "大额资金流入相关板块，资金面支持价格走势"
+            ];
+            
+            // 随机选择理由
+            const selectedTechnical = technicalReasons[Math.floor(Math.random() * technicalReasons.length)];
+            const selectedFundamental = fundamentalReasons[Math.floor(Math.random() * fundamentalReasons.length)];
+            const selectedSentiment = sentimentReasons[Math.floor(Math.random() * sentimentReasons.length)];
+            
+            return `
+                <div class="recommendation">
+                    <strong>建议:</strong> ${action} ${absAmount} 股
+                </div>
+                <span class="confidence">置信度: ${Math.floor(Math.random() * 30) + 70}%</span>
+                <div class="reasoning">
+                    <strong>分析理由:</strong><br>
+                    • <strong>技术分析:</strong> ${selectedTechnical}<br>
+                    • <strong>基本面分析:</strong> ${selectedFundamental}<br>
+                    • <strong>市场情绪:</strong> ${selectedSentiment}<br>
+                    <br>
+                    <strong>风险评估:</strong> 该建议基于当前市场条件，请注意市场波动可能导致投资价值变动。建议设置止损位在${(absAmount * 0.8).toFixed(0)}股以下以控制风险。
+                </div>
+            `;
+        }
+        
+        // 处理第二次决策提交
+        function handleSecondDecisionSubmission() {
+            const adjustment = parseInt(document.getElementById('secondInvestment').value) || 0;
+            
+            // 验证调整范围
+            if (Math.abs(adjustment) > experimentConfig.maxAdjustment) {
+                alert(`调整数量不能超过±${experimentConfig.maxAdjustment}股`);
+                return;
+            }
+            
+            // 记录最终调整
+            experimentState.secondAdjustment = adjustment;
+            experimentState.finalHolding = experimentConfig.initialHolding + experimentState.firstAdjustment + adjustment;
+            
+            // 计算从众分数（基于AI共识和最终调整）
+            const consensusDirection = experimentState.consensusDirection;
+            const consensusAverage = experimentState.currentAIConsensus;
+            
+            let conformityScore;
+            if (consensusDirection === "buy") {
+                conformityScore = adjustment - consensusAverage;
+            } else {
+                conformityScore = -adjustment - (-consensusAverage);
+            }
+            
+            // 记录当前试次数据
+            recordTrialData(conformityScore);
+            
+            // 显示结果模态框
+            showResultModal(conformityScore);
+        }
+        
+        // 记录试次数据
+        function recordTrialData(conformityScore) {
+            const currentCondition = experimentState.conditionOrder[experimentConfig.currentConditionIndex];
+            
+            const trialData = {
+                trial: (experimentConfig.currentConditionIndex * experimentConfig.roundsPerCondition) + experimentConfig.currentRoundInCondition,
+                stockType: experimentState.currentStock,
+                aiCount: currentCondition.aiCount,
+                explanationType: currentCondition.explanationType,
+                normativeStrength: currentCondition.normativeStrength,
+                firstDecision: experimentState.firstAdjustment,
+                aiConsensusAverage: experimentState.currentAIConsensus,
+                aiCounterConsensusAverage: experimentState.currentAICounterConsensus,
+                secondDecision: experimentState.secondAdjustment,
+                conformityScore: conformityScore
+            };
+            
+            experimentConfig.trialData.push(trialData);
+        }
+        
+        // 显示结果模态框
+        function showResultModal(conformityScore) {
+            const modal = document.getElementById('resultModal');
+            modal.classList.add('active');
+            
+            // 设置结果值
+            document.getElementById('resFirstAdjustment').textContent = 
+                `${experimentState.firstAdjustment > 0 ? '+' : ''}${experimentState.firstAdjustment} 股`;
+            document.getElementById('resSecondAdjustment').textContent = 
+                `${experimentState.secondAdjustment > 0 ? '+' : ''}${experimentState.secondAdjustment} 股`;
+            document.getElementById('resFinalHolding').textContent = `${experimentState.finalHolding} 股`;
+            document.getElementById('resConsensus').textContent = 
+                experimentState.consensusDirection === "buy" ? "买入" : "卖出";
+            document.getElementById('conformityScore').textContent = 
+                `${conformityScore > 0 ? '+' : ''}${conformityScore.toFixed(2)}`;
+        }
+        
+        // 关闭结果模态框
+        function closeResultModal() {
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('active');
+            
+            // 更新轮次
+            experimentConfig.currentRoundInCondition++;
+            
+            // 检查是否完成当前条件的所有轮次
+            if (experimentConfig.currentRoundInCondition > experimentConfig.roundsPerCondition) {
+                experimentConfig.currentRoundInCondition = 1;
+                experimentConfig.currentConditionIndex++;
+                
+                // 检查是否完成所有条件
+                if (experimentConfig.currentConditionIndex >= experimentState.conditionOrder.length) {
+                    // 实验完成
+                    document.getElementById('exportSection').style.display = 'block';
+                    return;
+                }
+            }
+            
+            // 更新进度
+            updateProgress();
+            
+            // 开始新一轮
+            startNewRound();
+        }
+        
+        // 重置决策表单
+        function resetDecisionForms() {
+            document.getElementById('firstInvestment').value = '0';
+            document.getElementById('secondInvestment').value = '0';
+            document.getElementById('firstHolding').textContent = experimentConfig.initialHolding;
+            document.getElementById('finalHolding').textContent = experimentConfig.initialHolding;
+            
+            experimentState.firstAdjustment = 0;
+            experimentState.secondAdjustment = 0;
+            experimentState.finalHolding = experimentConfig.initialHolding;
+        }
+        
+        // 导出数据为CSV
+        function exportDataToCSV() {
+            let csvContent = "试次,股票类型,AI数量,解释类型,规范强度,第一次决策,AI共识平均值,AI反共识平均值,第二次决策,从众分数\n";
+            
+            experimentConfig.trialData.forEach(trial => {
+                const row = [
+                    trial.trial,
+                    trial.stockType,
+                    trial.aiCount,
+                    trial.explanationType,
+                    trial.normativeStrength,
+                    trial.firstDecision,
+                    trial.aiConsensusAverage,
+                    trial.aiCounterConsensusAverage !== null ? trial.aiCounterConsensusAverage : "无",
+                    trial.secondDecision,
+                    trial.conformityScore
+                ].join(',');
+                
+                csvContent += row + '\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "投资从众行为实验数据.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
