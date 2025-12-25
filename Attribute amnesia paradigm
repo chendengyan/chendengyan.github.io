@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title> Attribute Amnesia </title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: white;
+            color: black;
+            text-align: center;
+        }
+        kbd {
+            padding: 2px 6px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+    <script src="https://unpkg.com/jspsych@7.3.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" />
+    <script src="https://unpkg.com/@jspsych/plugin-fullscreen@latest"></script>
+</head>
+<body>
+<script> 
+    var jsPsych = initJsPsych({
+        on_finish: function() {
+            // 在页面上显示数据
+            jsPsych.data.displayData();
+            //  保存数据
+            //jsPsych.data.get().localSave('csv', 'experiment_data.csv');            
+            // 使用自定义函数保存CSV数据（带UTF-8 BOM）
+            saveDataAsCSV();
+        }
+    });
+    
+    const consent_trial = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `<div style="text-align: left; max-width: 800px; margin: auto; padding: 20px; font-size: 16px; line-height: 1.6;">
+                <h2>知情同意书</h2>
+                <p><strong>研究名称：</strong>属性遗忘任务</p>
+                <p><strong>研究者：</strong>陈登焱 高佳妮 陈文杰 李晨浩</p>
+                <p>我们邀请您参与一项关于视觉注意与记忆的科学研究。请您在决定参与前，仔细阅读以下信息：</p>
+                <ul>
+                    <li>本实验将持续约2-3分钟。</li>
+                    <li>您的任务是观看屏幕上快速呈现的字母和数字，并根据指示进行按键反应。</li>
+                    <li>实验不会对您造成身体或心理的不适。您可以随时无条件退出，数据将被立即删除。</li>
+                    <li>所有收集的数据将完全匿名，仅用于整体分析和个人学术报告，绝不泄露您的个人身份。</li>
+                    <li>您的参与对本研究至关重要，我们对此表示衷心感谢。</li>
+                </ul>
+                <p><strong>参与声明：</strong></p>
+                <p style="text-align: center; margin-top: 30px;">
+                    如果您已阅读并理解上述信息，<strong>自愿同意</strong>参与本研究，请按 <kbd>I</kbd> 键继续。<br>
+                    如果您不同意，请按 <kbd>N</kbd> 键退出。
+                </p>
+            </div>`,
+            choices: ['i', 'n'], // 只允许按 I 或 N
+            prompt: '<p style="color: #555; font-size: 14px;">请按相应键选择。</p>',
+            record_data: false,
+            on_finish: function(data) {
+                // 如果按 N 键，立即结束实验
+                if (data.response === 'n') {
+                    jsPsych.endExperiment(`<div style="padding: 50px;"><h2>谢谢您！</h2><p>您已选择退出实验。感谢您的考虑。</p></div>`);
+                }
+            }
+         };
+
+     var fullscreen_trial = {
+             type: jsPsychFullscreen,
+             fullscreen_mode: true,  
+             message: '<p>实验将进入全屏模式</p>',
+             button_label: '进入全屏',
+             delay_after: 0,
+             record_data: false,
+             };
+
+     // 生成8位被试编号
+    const generated_ID = jsPsych.randomization.randomID(8);
+    console.log("被试编号:", generated_ID);
+  
+    // 实验参数
+    const LETTERS = ['A', 'B', 'D', 'E'];
+    const NUMBERS = ['2', '3', '4', '5', '6', '7', '8', '9'];
+    const POS_TO_KEY = { 0: 'q', 1: 'p', 2: 'z', 3: 'm' };
+    const LETTER_TO_KEY = { 'A': '6', 'B': '7', 'D': '8', 'E': '9' };
+    
+    var trialIndex = 0;
+    const cleanData = [];
+    
+    // 指导语 - 添加被试编号显示
+    const instructions = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="padding:50px; font-size:18px;">
+            <h2>欢迎参加实验</h2>
+            <p><strong>您的被试编号是：${generated_ID}</strong></p>
+            <p>屏幕上将出现 1 个英文字母和 3 个数字。</p>
+            <p><strong>请始终报告字母的位置：</strong></p>
+            <p>左上 = <kbd>Q</kbd> &nbsp;&nbsp; 右上 = <kbd>P</kbd> &nbsp;&nbsp; 左下 = <kbd>Z</kbd> &nbsp;&nbsp; 右下 = <kbd>M</kbd></p>
+            <p>按空格键开始实验。</p>
+        </div>`,
+        choices: [' ']
+    };
+
+    const timeline = [consent_trial, fullscreen_trial, instructions];
+
+    // 生成 2 blocks × 16 trials
+    for (let block = 0; block < 2; block++) {
+        for (let i = 0; i < 16; i++) {
+            trialIndex++;
+    
+            const isSurprise = (i === 11);
+            const isControl = (i > 11);
+    
+            const targetLetter = jsPsych.randomization.sampleWithoutReplacement(LETTERS, 1)[0];
+            const distractors = jsPsych.randomization.sampleWithoutReplacement(NUMBERS, 3);
+            const targetPos = Math.floor(Math.random() * 4);
+    
+            // 试次类型固化
+            const trialMeta = {
+                index: trialIndex,
+                type: isSurprise ? "突击试次" : isControl ? "控制试次" : "非突击试次",
+                correctLocationKey: POS_TO_KEY[targetPos],
+                correctIdentityKey: LETTER_TO_KEY[targetLetter]
+            };
+            
+            const items = Array(4).fill(null);
+            items[targetPos] = targetLetter;
+            let dIdx = 0;
+            for (let j = 0; j < 4; j++) {
+                if (items[j] === null) items[j] = distractors[dIdx++];
+            }
+    
+            const stimHtml = `
+                <div style="display: grid; grid-template-columns: 200px 200px; gap: 50px; margin: 50px auto; width: 500px;">
+                    <div style="font-size: 48px;">${items[0]}</div>
+                    <div style="font-size: 48px;">${items[1]}</div>
+                    <div style="font-size: 48px;">${items[2]}</div>
+                    <div style="font-size: 48px;">${items[3]}</div>
+                </div>
+            `;
+    
+            var identityResp = null;
+    
+            const fixation = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: '<div style="font-size: 80px; font-weight: bold;">+</div>',
+                choices: "NO_KEYS",
+                trial_duration: 1000
+            };
+            const stimulus = { 
+                type: jsPsychHtmlKeyboardResponse, 
+                stimulus: stimHtml, 
+                choices: "NO_KEYS", 
+                trial_duration: 250 
+            };
+            const blank = { 
+                type: jsPsychHtmlKeyboardResponse, 
+                stimulus: '', 
+                choices: "NO_KEYS", 
+                trial_duration: 500 
+            };
+    
+            if (isSurprise || isControl) {
+                const identityTask = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<div style="padding:50px; font-size:22px; color:red;">
+                        <strong>【惊喜记忆测试】</strong><br>
+                        你刚才看到的是哪一个字母？<br>
+                        A = <kbd>6</kbd> &nbsp; B = <kbd>7</kbd> &nbsp; D = <kbd>8</kbd> &nbsp; E = <kbd>9</kbd>
+                    </div>`,
+                    choices: ['6','7','8','9'],
+                    on_finish: (data) => {
+                        identityResp = {
+                            key: data.response,
+                            correct: data.response === trialMeta.correctIdentityKey
+                        };
+                    }
+                };
+    
+                const locationTask = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<div style="padding:50px; font-size:22px;">
+                        字母在哪个位置？<br>
+                        左上 = <kbd>Q</kbd> &nbsp; 右上 = <kbd>P</kbd> &nbsp; 左下 = <kbd>Z</kbd> &nbsp; 右下 = <kbd>M</kbd>
+                    </div>`,
+                    choices: ['q','p','z','m'],
+                    on_finish: (data) => {
+                        const responseKey = data.response;
+                        const isCorrect = (responseKey === trialMeta.correctLocationKey);
+                        cleanData.push({
+                            participant_id: generated_ID,
+                            trial_index: trialMeta.index,
+                            trial_type: trialMeta.type,
+                            location_response_key: responseKey,
+                            location_correct_key: trialMeta.correctLocationKey,
+                            location_correct: isCorrect,
+                            identity_response_key: identityResp ? identityResp.key : null,
+                            identity_correct_key: trialMeta.correctIdentityKey,
+                            identity_correct: identityResp ? identityResp.correct : null
+                        });
+                    }
+                };
+    
+                timeline.push({ timeline: [fixation, stimulus, blank, identityTask, locationTask] });
+    
+            } else {
+                const locationTask = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<div style="padding:50px; font-size:22px;">
+                        字母在哪个位置？<br>
+                        左上 = <kbd>Q</kbd> &nbsp; 右上 = <kbd>P</kbd> &nbsp; 左下 = <kbd>Z</kbd> &nbsp; 右下 = <kbd>M</kbd>
+                    </div>`,
+                    choices: ['q','p','z','m'],
+                    on_finish: (data) => {
+                        const responseKey = data.response;
+                        const isCorrect = (responseKey === trialMeta.correctLocationKey);
+                        cleanData.push({
+                            participant_id: generated_ID,
+                            trial_index: trialMeta.index,
+                            trial_type: trialMeta.type,
+                            location_response_key: responseKey,
+                            location_correct_key: trialMeta.correctLocationKey,
+                            location_correct: isCorrect,
+                            identity_response_key: null,
+                            identity_correct_key: null,
+                            identity_correct: null
+                        });
+                    }
+                };
+    
+                timeline.push({ timeline: [fixation, stimulus, blank, locationTask] });
+            }
+        }
+    
+        if (block < 1) { // 仅在第1轮后添加休息页
+            timeline.push({
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<div style="padding:60px; font-size:20px;">
+                    <h2>第 ${block + 1} 轮完成！</h2>
+                    <p>请休息片刻，按空格键继续。</p>
+                </div>`,
+                choices: [' ']
+            });
+        }
+    }
+    
+    // 结束页
+    timeline.push({
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="padding:100px;"><h1>实验结束！</h1><p>感谢您的参与！</p></div>`,
+        choices: "NO_KEYS",
+        trial_duration: 2000
+    });
+    
+    // 安全 CSV 导出函数（带 BOM，兼容 Excel）
+    function escapeCSV(value) {
+        if (value == null) return '';
+        if (typeof value === 'string') {
+            return '"' + value.replace(/"/g, '""') + '"';
+        }
+        if (typeof value === 'boolean') {
+            return value ? 'TRUE' : 'FALSE';
+        }
+        return String(value);
+    }
+    
+    // 保存数据的函数
+    function saveDataAsCSV() {
+        const headers = [
+            'participant_id',
+            'trial_index',
+            'trial_type',
+            'location_response_key',
+            'location_correct_key',
+            'location_correct',
+            'identity_response_key',
+            'identity_correct_key',
+            'identity_correct'
+        ];
+    
+        const csvRows = [headers.map(escapeCSV).join(',')];
+        cleanData.forEach(row => {
+            const line = headers.map(h => escapeCSV(row[h])).join(',');
+            csvRows.push(line);
+        });
+    
+        // 添加 UTF-8 BOM（\uFEFF）——解决 Excel 乱码
+        const csvContent = '\uFEFF' + csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `attribute_amnesia_data_${generated_ID}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log(`数据已保存为：attribute_amnesia_data_${generated_ID}.csv`);
+    }
+    
+    // 运行实验
+    jsPsych.run(timeline);
+</script>
+</body>
+</html>
