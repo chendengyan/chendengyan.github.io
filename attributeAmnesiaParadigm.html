@@ -20,6 +20,8 @@
     </style>
     <script src="https://unpkg.com/jspsych@7.3.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@latest"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@latest"></script>
     <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" />
     <script src="https://unpkg.com/@jspsych/plugin-fullscreen@latest"></script>
 </head>
@@ -76,6 +78,45 @@
              record_data: false,
              };
 
+    var participantGender = null;
+    var participantAge = null;
+
+    var gender = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: `请选择你的性别：`,
+          choices: ['男性', '女性'],
+          post_trial_gap: 500,
+          data: { 
+                  task: 'demographics',
+                  varname: 'gender' 
+                },
+          on_finish: function(data){
+              if(data.response == 0){
+                  participantGender = 'male';
+              } 
+              else {
+                  participantGender = 'female';
+              }
+              
+          }
+        };
+
+    var Age= {
+      type: jsPsychSurveyHtmlForm,
+      preamble: '<p>请填写你的年龄：</p>',
+      html: `<p><input name="Q0" type="number" placeholder="10-99" min="1" max="120" 
+              oninput = 'if(value.length>2) value = value.slice(0,2)' required
+              style='width: 100px;height: 30px;'/></p>`,
+      button_label: '继续',
+      data: { 
+              task: 'demographics',
+              varname: 'age' 
+            },
+      on_finish: function(data) {
+          participantAge = data.response.Q0;
+      }
+    };
+      
      // 生成8位被试编号
     const generated_ID = jsPsych.randomization.randomID(8);
     console.log("被试编号:", generated_ID);
@@ -103,7 +144,7 @@
         choices: [' ']
     };
 
-    const timeline = [consent_trial, fullscreen_trial, instructions];
+    const timeline = [consent_trial, fullscreen_trial, gender, Age, instructions];
 
     // 生成 2 blocks × 16 trials
     for (let block = 0; block < 2; block++) {
@@ -198,7 +239,9 @@
                             location_correct: isCorrect,
                             identity_response_key: identityResp ? identityResp.key : null,
                             identity_correct_key: trialMeta.correctIdentityKey,
-                            identity_correct: identityResp ? identityResp.correct : null
+                            identity_correct: identityResp ? identityResp.correct : null,
+                            gender: participantGender,  
+                            age: participantAge         
                         });
                     }
                 };
@@ -225,7 +268,9 @@
                             location_correct: isCorrect,
                             identity_response_key: null,
                             identity_correct_key: null,
-                            identity_correct: null
+                            identity_correct: null,
+                            gender: participantGender,  
+                            age: participantAge    
                         });
                     }
                 };
@@ -277,7 +322,9 @@
             'location_correct',
             'identity_response_key',
             'identity_correct_key',
-            'identity_correct'
+            'identity_correct',
+            'gender',     
+            'age'  
         ];
     
         const csvRows = [headers.map(escapeCSV).join(',')];
